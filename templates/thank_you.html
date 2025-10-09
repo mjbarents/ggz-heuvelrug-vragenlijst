@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Bedankt - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container center">
+    <div class="card thank-you-card">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="GGZ Heuvelrug" style="max-width: 300px; margin-bottom: 1.5rem;">
+        <div class="success-icon">✓</div>
+        <h1>Bedankt voor uw deelname!</h1>
+        <p>Uw antwoorden zijn anoniem en succesvol ontvangen door GGZ Heuvelrug.</p>
+        <p style="margin-top: 1rem;">U kunt deze pagina nu sluiten.</p>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GGZ Heuvelrug Werkbeleving vragenlijst{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% if session.get('admin_logged_in') %}
+    <nav class="admin-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-brand">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="GGZ Heuvelrug" class="logo">
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for('admin.admin_dashboard') }}">Resultaten</a>
+                <a href="{{ url_for('admin.admin_tokens') }}">Uitnodigingen</a>
+                <a href="{{ url_for('admin.admin_questions') }}">Beheer vragen</a>
+                <a href="{{ url_for('admin.admin_logout') }}" class="logout">Uitloggen</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 GGZ Heuvelrug | <a href="https://www.ggzheuvelrug.nl" target="_blank" class="text-link">www.ggzheuvelrug.nl</a> | 0343-522667</p>
+    </footer>
+</body>
+</html>
+

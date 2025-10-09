@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container center">
+    <div class="card welcome-card">
+        <div class="welcome-header">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="GGZ Heuvelrug" class="logo">
+            <h1>Welkom bij de werkbeleving vragenlijst</h1>
+            <p class="welcome-subtitle">Om toegang te krijgen tot de vragenlijst, heeft u een persoonlijke uitnodigingslink nodig.</p>
+        </div>
+        <div style="margin-top: 2rem; color: var(--text-secondary); font-size: 0.875rem;">
+            <p>Heeft u vragen? Neem contact op via <a href="mailto:info@ggzheuvelrug.nl" class="text-link">info@ggzheuvelrug.nl</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

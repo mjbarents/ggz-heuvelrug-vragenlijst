@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0;">Antwoorden overzicht</h1>
+        <div style="display: flex; gap: 1rem;">
+            <div style="background: linear-gradient(135deg, #0891b2 0%, #84cc16 100%); padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: white;">{{ total_tokens }}</div>
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem;">Totaal uitnodigingen</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #0891b2 0%, #84cc16 100%); padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: white;">{{ used_tokens }}</div>
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem;">Ingevulde vragenlijsten</div>
+            </div>
+        </div>
+    </div>
+    
+    {% if stats %}
+    <div class="card">
+        <h3>Gemiddelde score per vraag</h3>
+        <div class="stats-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vraag</th>
+                        <th>Gemiddelde score</th>
+                        <th>Aantal antwoorden</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in stats %}
+                    <tr>
+                        <td>{{ stat.question }}</td>
+                        <td class="score-cell">
+                            <span class="score-badge">{{ stat.avg_score }}</span>
+                        </td>
+                        <td>{{ stat.responses }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if grouped_responses %}
+    <div class="card" style="margin-top: 2rem;">
+        <h3>Individuele antwoorden</h3>
+        <div class="responses-list">
+            {% for response in grouped_responses %}
+            <div class="response-item">
+                <div class="response-header">
+                    <strong>Werknemer #{{ response.token_id }}</strong>
+                    <span class="response-date">{{ response.submitted_at.strftime('%d-%m-%Y %H:%M') }}</span>
+                </div>
+                <div class="response-answers">
+                    {% for answer in response.answers %}
+                    <div class="answer-row">
+                        <span class="answer-question">{{ answer.question }}</span>
+                        <span class="answer-score">
+                            <span class="score-badge">{{ answer.score }}/10</span>
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="margin-top: 2rem;">
+        <p class="empty-state">Nog geen antwoorden ontvangen.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

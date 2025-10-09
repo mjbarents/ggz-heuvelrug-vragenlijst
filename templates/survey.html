@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Vragenlijst - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card survey-card">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="GGZ Heuvelrug" style="max-width: 300px; margin-bottom: 2rem;">
+        <h1>Werkbeleving vragenlijst (anoniem)</h1>
+        <p class="subtitle">Geef een cijfer van 0 tot 10 voor elk van de volgende thema's met betrekking tot uw werk</p>
+        
+        <form method="POST" action="{{ url_for('main.submit_survey') }}" class="survey-form">
+            <input type="hidden" name="token" value="{{ token }}">
+            
+            {% for question in questions %}
+            <div class="question-block">
+                <label class="question-label">
+                    <span class="question-number">{{ loop.index }}.</span>
+                    {{ question.text }}
+                </label>
+                
+                <div class="score-selector">
+                    {% for i in range(11) %}
+                    <label class="score-option">
+                        <input type="radio" name="question_{{ question.id }}" value="{{ i }}" required>
+                        <span class="score-value">{{ i }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="score-labels">
+                    <span>Helemaal niet</span>
+                    <span>Volledig</span>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="info-box">
+                <p><strong>Let op:</strong> Controleer uw antwoorden goed voordat u verzendt. Na verzenden kunt u uw antwoorden niet meer wijzigen.</p>
+            </div>
+            
+            <button type="submit" class="btn-primary">Verstuur antwoorden</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Form validation to ensure all questions are answered
+document.querySelector('.survey-form').addEventListener('submit', function(e) {
+    const radios = document.querySelectorAll('input[type="radio"]');
+    const questionIds = new Set();
+    
+    // Collect all unique question IDs
+    radios.forEach(radio => {
+        const name = radio.name;
+        questionIds.add(name);
+    });
+    
+    // Check if each question has a selected answer
+    let allAnswered = true;
+    questionIds.forEach(questionName => {
+        const checked = document.querySelector(`input[name="${questionName}"]:checked`);
+        if (!checked) {
+            allAnswered = false;
+        }
+    });
+    
+    if (!allAnswered) {
+        e.preventDefault();
+        alert('Let op: U moet alle vragen beantwoorden voordat u de vragenlijst kunt versturen.');
+        // Scroll to first unanswered question
+        questionIds.forEach(questionName => {
+            const checked = document.querySelector(`input[name="${questionName}"]:checked`);
+            if (!checked) {
+                const questionBlock = document.querySelector(`input[name="${questionName}"]`).closest('.question-block');
+                questionBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                questionBlock.style.border = '2px solid #f59e0b';
+                setTimeout(() => {
+                    questionBlock.style.border = '1px solid var(--border-color)';
+                }, 2000);
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+

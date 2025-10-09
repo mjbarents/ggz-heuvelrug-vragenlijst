@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Bekijk Antwoorden - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Antwoorden overzicht</h1>
+    
+    {% if stats %}
+    <div class="card">
+        <h2>Gemiddelde score per vraag</h2>
+        <div class="stats-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vraag</th>
+                        <th>Gemiddelde score</th>
+                        <th>Aantal antwoorden</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in stats %}
+                    <tr>
+                        <td>{{ stat.question }}</td>
+                        <td class="score-cell">
+                            <span class="score-badge">{{ stat.avg_score }}</span>
+                        </td>
+                        <td>{{ stat.responses }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if grouped_responses %}
+    <div class="card">
+        <h2>Individuele antwoorden</h2>
+        <div class="responses-list">
+            {% for response in grouped_responses %}
+            <div class="response-item">
+                <div class="response-header">
+                    <strong>Werknemer #{{ response.token_id }}</strong>
+                    <span class="response-date">{{ response.submitted_at.strftime('%d-%m-%Y %H:%M') }}</span>
+                </div>
+                <div class="response-answers">
+                    {% for answer in response.answers %}
+                    <div class="answer-row">
+                        <span class="answer-question">{{ answer.question }}</span>
+                        <span class="answer-score">
+                            <span class="score-badge">{{ answer.score }}/10</span>
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <p class="empty-state">Nog geen antwoorden ontvangen.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

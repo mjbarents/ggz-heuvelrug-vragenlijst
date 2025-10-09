@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Error - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container center">
+    <div class="card error-card">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="GGZ Heuvelrug" style="max-width: 300px; margin-bottom: 1.5rem;">
+        <div class="error-icon">✗</div>
+        <h1>Er is een fout opgetreden</h1>
+        <p>{{ message }}</p>
+        <p style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+            Neem bij vragen contact op via <a href="mailto:info@ggzheuvelrug.nl" class="text-link">info@ggzheuvelrug.nl</a> of bel 0343-522667
+        </p>
+        <a href="{{ url_for('main.index') }}" class="btn-secondary" style="margin-top: 1rem;">Terug naar Home</a>
+    </div>
+</div>
+{% endblock %}
+

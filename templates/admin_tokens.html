@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Beheer Uitnodigingen - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Beheer uitnodigingen</h1>
+    
+    <div class="card">
+        <h2>Genereer nieuwe uitnodiging</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">Elke uitnodiging kan maar één keer gebruikt worden door een deelnemer.</p>
+        <form method="POST" action="{{ url_for('admin.admin_generate_token') }}">
+            <input type="hidden" name="count" value="1">
+            <button type="submit" class="btn-primary">Genereer uitnodiging</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <h2>Alle uitnodigingen</h2>
+        {% if tokens %}
+        <div class="tokens-list">
+            {% for token in tokens %}
+            <div class="token-item {% if token.used %}used{% endif %}">
+                <div class="token-info">
+                    <div class="token-status">
+                        {% if token.used %}
+                        <span class="badge badge-used">Ingevuld</span>
+                        {% else %}
+                        <span class="badge badge-active">Nog niet gebruikt</span>
+                        {% endif %}
+                    </div>
+                    <div class="token-url">
+                        <strong>Uitnodigingslink:</strong>
+                        <div style="display: flex; gap: 0.5rem; align-items: stretch; margin-top: 0.25rem;">
+                            <input type="text" 
+                                   value="{{ request.url_root }}survey/{{ token.token }}" 
+                                   onclick="this.select(); document.execCommand('copy'); showCopied(this);"
+                                   readonly
+                                   class="token-link"
+                                   title="Klik om te kopiëren"
+                                   style="flex: 1; margin: 0;">
+                            {% if token.used %}
+                            <button type="button" class="btn-small btn-danger" disabled title="Ingevulde vragenlijsten kunnen niet verwijderd worden" style="margin: 0;">Verwijderen</button>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('admin.admin_delete_token', id=token.id) }}" style="display: inline; margin: 0;" onsubmit="return confirm('Weet je zeker dat je deze uitnodiging wilt verwijderen?');">
+                                <button type="submit" class="btn-small btn-danger" style="margin: 0;">Verwijderen</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="token-dates">
+                        <span>Aangemaakt: {{ token.created_at.strftime('%d-%m-%Y %H:%M') }}</span>
+                        {% if token.used %}
+                        <span>Ingevuld op: {{ token.used_at.strftime('%d-%m-%Y %H:%M') }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">Geen uitnodigingen gevonden. Genereer de eerste uitnodiging!</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function showCopied(element) {
+    const original = element.style.backgroundColor;
+    element.style.backgroundColor = '#A4C938';
+    setTimeout(() => {
+        element.style.backgroundColor = original;
+    }, 500);
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Beheer vragen - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Beheer vragen</h1>
+    
+    <div class="card">
+        <h2>Nieuwe vraag toevoegen</h2>
+        <form method="POST" action="{{ url_for('admin.admin_add_question') }}" class="add-form">
+            <div class="form-group">
+                <input type="text" name="text" placeholder="Vraagtekst..." required>
+            </div>
+            <button type="submit" class="btn-primary">Toevoegen</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <h2>Huidige vragen</h2>
+        {% if questions %}
+        <div class="questions-list">
+            {% for question in questions %}
+            <div class="question-item">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="vertical-align: middle; padding: 0;">
+                            <div class="question-content">
+                                <span class="question-number">{{ question.order }}.</span>
+                                <span class="question-text">{{ question.text }}</span>
+                            </div>
+                        </td>
+                        <td style="vertical-align: middle; text-align: right; white-space: nowrap; padding: 0 0 0 1rem;">
+                            <button onclick="editQuestion({{ question.id }}, '{{ question.text }}')" class="btn-small btn-secondary">Bewerken</button>
+                            {% if question.responses %}
+                            <button type="button" class="btn-small btn-danger" disabled title="Vragen met antwoorden kunnen niet verwijderd worden">Verwijderen</button>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('admin.admin_delete_question', id=question.id) }}" style="display: inline;" onsubmit="return confirm('Weet je zeker dat je deze vraag wilt verwijderen?');">
+                                <button type="submit" class="btn-small btn-danger">Verwijderen</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">Geen vragen gevonden. Voeg de eerste vraag toe!</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Vraag Bewerken</h2>
+        <form id="editForm" method="POST">
+            <div class="form-group">
+                <label>Vraagtekst</label>
+                <input type="text" id="editText" name="text" required>
+            </div>
+            <button type="submit" class="btn-primary">Opslaan</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function editQuestion(id, text) {
+    document.getElementById('editModal').style.display = 'block';
+    document.getElementById('editForm').action = '/admin/questions/edit/' + id;
+    document.getElementById('editText').value = text;
+}
+
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}
+
