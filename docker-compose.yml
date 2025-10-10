@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  survey-app:
+    build: .
+    container_name: ggz-survey
+    ports:
+      - "${PORT:-5000}:5000"
+    volumes:
+      - survey-data:/app/instance
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  survey-data:
+    driver: local

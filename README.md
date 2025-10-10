@@ -30,33 +30,61 @@ en configureer de vereiste waarden:
 ### 2. Docker Setup
 
 ```bash
-# Build container
-docker build -t survey-app .
+# Start applicatie
+docker-compose up -d
 
-# Run applicatie
-docker run -d --name survey \
-  -p 5000:5000 \
-  -v $(pwd)/data:/app/instance \
-  --env-file .env \
-  --restart unless-stopped \
-  survey-app
+# Stop applicatie
+docker-compose down
+
+# Logs bekijken
+docker-compose logs -f
+
+# Database backup maken
+docker-compose exec survey-app tar -czf /app/backup.tar.gz -C /app/instance .
+docker cp ggz-survey:/app/backup.tar.gz ./backup-$(date +%Y%m%d).tar.gz
 ```
 
 Applicatie beschikbaar op `http://localhost:5000`
+
 ## Beheer
 
 ```bash
 # Stop applicatie
-docker stop survey
+docker-compose down
 
 # Start applicatie
-docker start survey
+docker-compose up -d
 
 # Logs bekijken
-docker logs survey
+docker-compose logs -f
 
-# Backup data
-cp -r ./data ./backup-$(date +%Y%m%d)
+# Volume informatie
+docker volume ls
+docker volume inspect ggz-heuvelrug-vragenlijst_survey-data
+
+# Database backup
+docker-compose exec survey-app tar -czf /app/backup.tar.gz -C /app/instance .
+docker cp ggz-survey:/app/backup.tar.gz ./backup-$(date +%Y%m%d).tar.gz
+```
+
+## Data Migratie
+
+Als je al een draaiende container hebt zonder persistent volume:
+
+```bash
+# 1. Backup bestaande database
+docker cp survey:/app/instance/survey.db ./survey.db.backup
+
+# 2. Stop en verwijder oude container
+docker stop survey
+docker rm survey
+
+# 3. Start met docker-compose
+docker-compose up -d
+
+# 4. Kopieer database terug (indien nodig)
+docker cp ./survey.db.backup ggz-survey:/app/instance/survey.db
+docker-compose restart
 ```
 
 ## Admin Panel
@@ -69,4 +97,4 @@ URL: `http://your-server:5000/admin/login`
 - Python 3.11
 - SQLite3
 - python-dotenv 
-- openpyxl 
+- openpyxl
