@@ -10,6 +10,7 @@
         <h2>Genereer nieuwe uitnodiging</h2>
         <p style="color: var(--text-secondary); margin-bottom: 1rem;">Elke uitnodiging kan maar één keer gebruikt worden door een deelnemer.</p>
         <form method="POST" action="{{ url_for('admin.admin_generate_token') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="count" value="1">
             <button type="submit" class="btn-primary">Genereer uitnodiging</button>
         </form>
@@ -43,6 +44,7 @@
                             <button type="button" class="btn-small btn-danger" disabled title="Ingevulde vragenlijsten kunnen niet verwijderd worden" style="margin: 0;">Verwijderen</button>
                             {% else %}
                             <form method="POST" action="{{ url_for('admin.admin_delete_token', id=token.id) }}" id="deleteTokenForm{{ token.id }}" style="display: inline; margin: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <button type="button" onclick="confirmDeleteToken({{ token.id }})" class="btn-small btn-danger" style="margin: 0;">Verwijderen</button>
                             </form>
                             {% endif %}

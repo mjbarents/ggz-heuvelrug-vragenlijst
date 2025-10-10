@@ -28,6 +28,7 @@
         </div>
         <div style="display: flex; gap: 1rem; align-items: center; justify-content: stretch;">
             <form method="POST" id="resetForm" style="flex:1;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button type="button" onclick="confirmReset()" class="btn btn-danger" style="width: 100%; padding: 1rem; font-size: 1rem; background: #dc2626; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600; transition: all 0.2s;">
                     Reset vragenlijst
                 </button>

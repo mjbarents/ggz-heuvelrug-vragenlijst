@@ -10,6 +10,7 @@
         <p class="subtitle">Geef een cijfer van 0 tot 10 voor elk van de volgende thema's met betrekking tot uw werk</p>
         
         <form method="POST" action="{{ url_for('main.submit_survey') }}" class="survey-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="token" value="{{ token }}">
             
             {% for question in questions %}
