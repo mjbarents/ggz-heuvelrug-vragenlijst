@@ -66,7 +66,11 @@ document.querySelector('.survey-form').addEventListener('submit', function(e) {
     
     if (!allAnswered) {
         e.preventDefault();
-        alert('Let op: U moet alle vragen beantwoorden voordat u de vragenlijst kunt versturen.');
+        showAlert('U moet alle vragen beantwoorden voordat u de vragenlijst kunt versturen.', {
+            title: 'Niet alle vragen beantwoord',
+            type: 'warning',
+            confirmText: 'OK'
+        });
         // Scroll to first unanswered question
         questionIds.forEach(questionName => {
             const checked = document.querySelector(`input[name="${questionName}"]:checked`);

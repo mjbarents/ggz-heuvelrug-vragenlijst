@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Reset Data - GGZ Heuvelrug{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+        <h1 style="margin: 0;">Reset vragenlijst</h1>
+    </div>
+    
+    <div class="card" style="max-width: 700px; margin: 0 auto;">
+        <div style="background-color: #fee2e2; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+            <h3 style="color: #991b1b; margin-top: 0; margin-bottom: 0.5rem; font-size: 1.1rem;">Waarschuwing</h3>
+            <p style="margin-bottom: 0; color: #7f1d1d; line-height: 1.6;">Door deze actie worden gegevens <strong>permanent</strong> verwijderd. Zorg daarom dat u de antwoorden heeft geëxporteerd voordat u deze actie uitvoert.</p>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+            <h4 style="margin-top: 0; margin-bottom: 0.75rem; color: #374151; font-size: 1rem;">Wat wordt verwijderd:</h4>
+            <ul style="margin-bottom: 0; margin-top: 0; padding-left: 1.5rem; color: #4b5563;">
+                <li style="margin-bottom: 0.5rem;">Alle uitnodigingen (tokens)</li>
+                <li>Alle ingevulde vragenlijsten (antwoorden)</li>
+            </ul>
+            
+            <h4 style="margin-top: 1.25rem; margin-bottom: 0.75rem; color: #374151; font-size: 1rem;">Wat blijft behouden:</h4>
+            <ul style="margin-bottom: 0; margin-top: 0; padding-left: 1.5rem; color: #4b5563;">
+                <li>Alle vragen</li>
+            </ul>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center; justify-content: stretch;">
+            <form method="POST" id="resetForm" style="flex:1;">
+                <button type="button" onclick="confirmReset()" class="btn btn-danger" style="width: 100%; padding: 1rem; font-size: 1rem; background: #dc2626; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600; transition: all 0.2s;">
+                    Reset vragenlijst
+                </button>
+            </form>
+            {% if has_responses %}
+            <a href="{{ url_for('admin.admin_export_responses') }}" class="btn-export" style="text-decoration: none; background: #0891b2; color: white; padding: 0.75rem 1.5rem; border: 2px solid #0891b2; border-radius: 0.5rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 0.5rem; height: 100%;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Exporteer
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-danger:hover {
+    background: #b91c1c !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-export:hover {
+    background: #0e7490 !important;
+    border-color: #0e7490 !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+</style>
+
+<script>
+function confirmReset() {
+    showConfirm(
+        'Weet u zeker dat u alle uitnodigingen en antwoorden wilt verwijderen? Deze actie kan niet ongedaan gemaakt worden!',
+        () => {
+            document.getElementById('resetForm').submit();
+        },
+        {
+            title: 'Bevestig Reset',
+            confirmText: 'Ja, verwijderen',
+            cancelText: 'Annuleren',
+            type: 'danger'
+        }
+    );
+}
+</script>
+{% endblock %}
+

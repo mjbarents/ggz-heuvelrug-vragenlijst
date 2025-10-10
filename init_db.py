@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from app import app, db
 from models import Question
 
@@ -11,19 +10,19 @@ def init_database():
             print("Database already initialized.")
             return
 
-        default_questions = [
+        standaard_vragen = [
             "Vind je jouw werk betekenisvol?",
             "Zit je met je werk in de flow?",
             "Voel je verbondenheid in het werk en het team?",
             "Voelt het werk als duurzaam?",
         ]
 
-        for i, question_text in enumerate(default_questions, start=1):
+        for i, question_text in enumerate(standaard_vragen, start=1):
             question = Question(text=question_text, order=i)
             db.session.add(question)
 
         db.session.commit()
-        print(f"Database initialized with {len(default_questions)} questions.")
+        print(f"Database successfully initialized")
 
 
 if __name__ == "__main__":

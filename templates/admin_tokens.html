@@ -42,8 +42,8 @@
                             {% if token.used %}
                             <button type="button" class="btn-small btn-danger" disabled title="Ingevulde vragenlijsten kunnen niet verwijderd worden" style="margin: 0;">Verwijderen</button>
                             {% else %}
-                            <form method="POST" action="{{ url_for('admin.admin_delete_token', id=token.id) }}" style="display: inline; margin: 0;" onsubmit="return confirm('Weet je zeker dat je deze uitnodiging wilt verwijderen?');">
-                                <button type="submit" class="btn-small btn-danger" style="margin: 0;">Verwijderen</button>
+                            <form method="POST" action="{{ url_for('admin.admin_delete_token', id=token.id) }}" id="deleteTokenForm{{ token.id }}" style="display: inline; margin: 0;">
+                                <button type="button" onclick="confirmDeleteToken({{ token.id }})" class="btn-small btn-danger" style="margin: 0;">Verwijderen</button>
                             </form>
                             {% endif %}
                         </div>
@@ -71,6 +71,21 @@ function showCopied(element) {
     setTimeout(() => {
         element.style.backgroundColor = original;
     }, 500);
+}
+
+function confirmDeleteToken(tokenId) {
+    showConfirm(
+        'Weet je zeker dat je deze uitnodiging wilt verwijderen?',
+        () => {
+            document.getElementById('deleteTokenForm' + tokenId).submit();
+        },
+        {
+            title: 'Uitnodiging verwijderen',
+            confirmText: 'Ja, verwijderen',
+            cancelText: 'Annuleren',
+            type: 'warning'
+        }
+    );
 }
 </script>
 {% endblock %}

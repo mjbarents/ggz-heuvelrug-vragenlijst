@@ -12,54 +12,61 @@ Web-applicatie voor anonieme werkbeleving vragenlijst.
 
 ## Installatie
 
-```bash
-apt-get update
-apt-get install -y python3 python3-pip python3-venv
+### 1. Configuratie
 
-chmod +x setup.sh
-./setup.sh
-```
-
-## Starten
+Kopieer `.env.example` naar `.env`
 
 ```bash
-source venv/bin/activate
-python3 app.py
+cp .env.example .env
 ```
 
-Applicatie beschikbaar op `http://localhost:8000`
+en configureer de vereiste waarden:
 
-Andere port gebruiken:
-```bash
-PORT=5000 python3 app.py
-```
+- `SECRET_KEY` (sterke willekeurige sleutel)
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
+- `PORT` (per default ingesteld op 5000, ook in `Dockerfile`)
 
-## Configuratie
-
-Optioneel environment variabelen:
+### 2. Docker Setup
 
 ```bash
-export PORT=5000
-export SECRET_KEY='your-secret-key'
-export ADMIN_USERNAME='admin'
-export ADMIN_PASSWORD='admin'
+# Build container
+docker build -t survey-app .
+
+# Run applicatie
+docker run -d --name survey \
+  -p 5000:5000 \
+  -v $(pwd)/data:/app/instance \
+  --env-file .env \
+  --restart unless-stopped \
+  survey-app
 ```
 
-Defaults: port 8000, admin / admin
+Applicatie beschikbaar op `http://localhost:5000`
+## Beheer
+
+```bash
+# Stop applicatie
+docker stop survey
+
+# Start applicatie
+docker start survey
+
+# Logs bekijken
+docker logs survey
+
+# Backup data
+cp -r ./data ./backup-$(date +%Y%m%d)
+```
 
 ## Admin Panel
 
-URL: `http://your-server:PORT/admin/login`
-
-
-## Database Backup
-
-```bash
-cp instance/survey.db instance/survey.db.backup-$(date +%Y%m%d)
-```
+URL: `http://your-server:5000/admin/login`
 
 ## Technische Specificaties
 
-- Flask 3.0
-- Python 3.8+
+- Flask 3.0 + Flask-WTF
+- Python 3.11
 - SQLite3
+- python-dotenv 
+- openpyxl 
