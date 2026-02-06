@@ -11,14 +11,15 @@ def init_database():
             return
 
         standaard_vragen = [
-            "Vind je jouw werk betekenisvol?",
-            "Zit je met je werk in de flow?",
-            "Voel je verbondenheid in het werk en het team?",
-            "Voelt het werk als duurzaam?",
+            ("Vind je jouw werk betekenisvol?", "scale"),
+            ("Zit je met je werk in de flow?", "scale"),
+            ("Voel je verbondenheid in het werk en het team?", "scale"),
+            ("Voelt het werk als duurzaam?", "scale"),
+            ("Heb je nog overige opmerkingen die je zou willen toevoegen?", "open"),
         ]
 
-        for i, question_text in enumerate(standaard_vragen, start=1):
-            question = Question(text=question_text, order=i)
+        for i, (question_text, question_type) in enumerate(standaard_vragen, start=1):
+            question = Question(text=question_text, order=i, question_type=question_type)
             db.session.add(question)
 
         db.session.commit()

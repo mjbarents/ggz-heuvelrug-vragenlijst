@@ -44,26 +44,35 @@ def submit_survey():
     questions = Question.query.all()
 
     for question in questions:
-        score = request.form.get(f"question_{question.id}")
-        if score is None or score == "":
-            flash(
-                "Let op: U moet alle vragen beantwoorden voordat u de vragenlijst kunt versturen.",
-                "warning",
-            )
-            return redirect(url_for("main.survey", token_string=token_string))
-
-        try:
-            score = int(score)
-            if score < 0 or score > 10:
-                flash("Scores moeten tussen 0 en 10 liggen.", "error")
+        if question.question_type == "scale":
+            score = request.form.get(f"question_{question.id}")
+            if score is None or score == "":
+                flash(
+                    "Let op: U moet alle schaalvragen beantwoorden voordat u de vragenlijst kunt versturen.",
+                    "warning",
+                )
                 return redirect(url_for("main.survey", token_string=token_string))
-        except ValueError:
-            flash("Ongeldige score ingevoerd.", "error")
-            return redirect(url_for("main.survey", token_string=token_string))
+
+            try:
+                score = int(score)
+                if score < 0 or score > 10:
+                    flash("Scores moeten tussen 0 en 10 liggen.", "error")
+                    return redirect(url_for("main.survey", token_string=token_string))
+            except ValueError:
+                flash("Ongeldige score ingevoerd.", "error")
+                return redirect(url_for("main.survey", token_string=token_string))
 
     for question in questions:
-        score = int(request.form.get(f"question_{question.id}"))
-        response = Response(token_id=token.id, question_id=question.id, score=score)
+        if question.question_type == "open":
+            text_answer = request.form.get(f"question_{question.id}", "").strip()
+            response = Response(
+                token_id=token.id,
+                question_id=question.id,
+                text_answer=text_answer if text_answer else None,
+            )
+        else:
+            score = int(request.form.get(f"question_{question.id}"))
+            response = Response(token_id=token.id, question_id=question.id, score=score)
         db.session.add(response)
 
     token.used = True

@@ -74,7 +74,9 @@ def admin_dashboard():
             Response.token_id,
             Response.submitted_at,
             Question.text,
+            Question.question_type,
             Response.score,
+            Response.text_answer,
         )
         .join(Question)
         .order_by(Response.token_id, Question.order)
@@ -91,25 +93,49 @@ def admin_dashboard():
                 "answers": [],
             }
         grouped_responses[token_id]["answers"].append(
-            {"question": response.text, "score": response.score}
+            {
+                "question": response.text,
+                "question_type": response.question_type,
+                "score": response.score,
+                "text_answer": response.text_answer,
+            }
         )
 
     questions = Question.query.order_by(Question.order).all()
     stats = []
     for question in questions:
-        scores = [
-            r.score for r in Response.query.filter_by(question_id=question.id).all()
-        ]
-        if scores:
-            avg_score = sum(scores) / len(scores)
-            stats.append(
-                {
-                    "question": question.text,
-                    "avg_score": round(avg_score, 1),
-                    "responses": len(scores),
-                    "scores": scores,
-                }
-            )
+        if question.question_type == "scale":
+            scores = [
+                r.score
+                for r in Response.query.filter_by(question_id=question.id).all()
+                if r.score is not None
+            ]
+            if scores:
+                avg_score = sum(scores) / len(scores)
+                stats.append(
+                    {
+                        "question": question.text,
+                        "question_type": "scale",
+                        "avg_score": round(avg_score, 1),
+                        "responses": len(scores),
+                        "scores": scores,
+                    }
+                )
+        else:
+            text_answers = [
+                r.text_answer
+                for r in Response.query.filter_by(question_id=question.id).all()
+                if r.text_answer
+            ]
+            if text_answers:
+                stats.append(
+                    {
+                        "question": question.text,
+                        "question_type": "open",
+                        "responses": len(text_answers),
+                        "text_answers": text_answers,
+                    }
+                )
 
     return render_template(
         "admin_dashboard.html",
@@ -133,9 +159,12 @@ def admin_questions():
 @admin_required
 def admin_add_question():
     text = request.form.get("text")
+    question_type = request.form.get("question_type", "scale")
+    if question_type not in ("scale", "open"):
+        question_type = "scale"
     if text:
         max_order = db.session.query(func.max(Question.order)).scalar() or 0
-        question = Question(text=text, order=max_order + 1)
+        question = Question(text=text, order=max_order + 1, question_type=question_type)
         db.session.add(question)
         db.session.commit()
     return redirect(url_for("admin.admin_questions"))
@@ -146,9 +175,12 @@ def admin_add_question():
 def admin_edit_question(id):
     question = Question.query.get_or_404(id)
     text = request.form.get("text")
+    question_type = request.form.get("question_type")
     if text:
         question.text = text
-        db.session.commit()
+    if question_type in ("scale", "open"):
+        question.question_type = question_type
+    db.session.commit()
     return redirect(url_for("admin.admin_questions"))
 
 
@@ -246,14 +278,25 @@ def admin_export_responses():
 
     row = 2
     for idx, question in enumerate(questions, 1):
-        scores = [
-            r.score for r in Response.query.filter_by(question_id=question.id).all()
-        ]
-
         ws_avg[f"A{row}"] = idx
         ws_avg[f"B{row}"] = question.text
-        ws_avg[f"C{row}"] = round(sum(scores) / len(scores), 1) if scores else 0
-        ws_avg[f"D{row}"] = len(scores)
+
+        if question.question_type == "scale":
+            scores = [
+                r.score
+                for r in Response.query.filter_by(question_id=question.id).all()
+                if r.score is not None
+            ]
+            ws_avg[f"C{row}"] = round(sum(scores) / len(scores), 1) if scores else 0
+            ws_avg[f"D{row}"] = len(scores)
+        else:
+            text_answers = [
+                r.text_answer
+                for r in Response.query.filter_by(question_id=question.id).all()
+                if r.text_answer
+            ]
+            ws_avg[f"C{row}"] = "Open vraag"
+            ws_avg[f"D{row}"] = len(text_answers)
 
         for col in ["A", "B", "C", "D"]:
             ws_avg[f"{col}{row}"].border = border
@@ -278,7 +321,9 @@ def admin_export_responses():
             Response.submitted_at,
             Question.order,
             Question.text,
+            Question.question_type,
             Response.score,
+            Response.text_answer,
         )
         .join(Question)
         .order_by(Response.token_id, Question.order)
@@ -293,7 +338,10 @@ def admin_export_responses():
                 "submitted_at": response.submitted_at,
                 "answers": {},
             }
-        grouped_responses[token_id]["answers"][response.order] = response.score
+        if response.question_type == "open":
+            grouped_responses[token_id]["answers"][response.order] = response.text_answer or ""
+        else:
+            grouped_responses[token_id]["answers"][response.order] = response.score
 
     ws_ind["A1"] = "Werknemer ID"
     ws_ind["B1"] = "Ingediend op"
@@ -337,8 +385,12 @@ def admin_export_responses():
 
     ws_ind.column_dimensions["A"].width = 15
     ws_ind.column_dimensions["B"].width = 18
-    for col in range(3, 3 + len(questions)):
-        ws_ind.column_dimensions[get_column_letter(col)].width = 8
+    for col_idx, question in enumerate(questions):
+        col_num = 3 + col_idx
+        if question.question_type == "open":
+            ws_ind.column_dimensions[get_column_letter(col_num)].width = 40
+        else:
+            ws_ind.column_dimensions[get_column_letter(col_num)].width = 8
 
     # Vraag referentie
     if questions:

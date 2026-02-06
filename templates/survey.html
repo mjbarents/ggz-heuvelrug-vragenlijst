@@ -14,12 +14,16 @@
             <input type="hidden" name="token" value="{{ token }}">
             
             {% for question in questions %}
-            <div class="question-block">
+            <div class="question-block" data-question-type="{{ question.question_type }}">
                 <label class="question-label">
                     <span class="question-number">{{ loop.index }}.</span>
                     {{ question.text }}
                 </label>
                 
+                {% if question.question_type == 'open' %}
+                <textarea name="question_{{ question.id }}" class="open-question-textarea" placeholder="Typ hier uw antwoord..."></textarea>
+                <p class="open-question-hint">Dit is een optionele open vraag.</p>
+                {% else %}
                 <div class="score-selector">
                     {% for i in range(11) %}
                     <label class="score-option">
@@ -32,6 +36,7 @@
                     <span>Helemaal niet</span>
                     <span>Volledig</span>
                 </div>
+                {% endif %}
             </div>
             {% endfor %}
             
@@ -45,46 +50,37 @@
 </div>
 
 <script>
-// Form validation to ensure all questions are answered
 document.querySelector('.survey-form').addEventListener('submit', function(e) {
-    const radios = document.querySelectorAll('input[type="radio"]');
-    const questionIds = new Set();
-    
-    // Collect all unique question IDs
-    radios.forEach(radio => {
-        const name = radio.name;
-        questionIds.add(name);
-    });
-    
-    // Check if each question has a selected answer
+    const scaleBlocks = document.querySelectorAll('.question-block[data-question-type="scale"]');
     let allAnswered = true;
-    questionIds.forEach(questionName => {
-        const checked = document.querySelector(`input[name="${questionName}"]:checked`);
-        if (!checked) {
-            allAnswered = false;
+    let firstUnanswered = null;
+    
+    scaleBlocks.forEach(block => {
+        const radio = block.querySelector('input[type="radio"]');
+        if (radio) {
+            const name = radio.name;
+            const checked = block.querySelector(`input[name="${name}"]:checked`);
+            if (!checked) {
+                allAnswered = false;
+                if (!firstUnanswered) {
+                    firstUnanswered = block;
+                }
+            }
         }
     });
     
-    if (!allAnswered) {
+    if (!allAnswered && firstUnanswered) {
         e.preventDefault();
-        showAlert('U moet alle vragen beantwoorden voordat u de vragenlijst kunt versturen.', {
+        showAlert('U moet alle schaalvragen beantwoorden voordat u de vragenlijst kunt versturen.', {
             title: 'Niet alle vragen beantwoord',
             type: 'warning',
             confirmText: 'OK'
         });
-        // Scroll to first unanswered question
-        questionIds.forEach(questionName => {
-            const checked = document.querySelector(`input[name="${questionName}"]:checked`);
-            if (!checked) {
-                const questionBlock = document.querySelector(`input[name="${questionName}"]`).closest('.question-block');
-                questionBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                questionBlock.style.border = '2px solid #f59e0b';
-                setTimeout(() => {
-                    questionBlock.style.border = '1px solid var(--border-color)';
-                }, 2000);
-                return false;
-            }
-        });
+        firstUnanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstUnanswered.style.border = '2px solid #f59e0b';
+        setTimeout(() => {
+            firstUnanswered.style.border = '1px solid var(--border-color)';
+        }, 2000);
     }
 });
 </script>

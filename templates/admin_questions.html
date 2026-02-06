@@ -8,12 +8,24 @@
     
     <div class="card">
         <h2>Nieuwe vraag toevoegen</h2>
-        <form method="POST" action="{{ url_for('admin.admin_add_question') }}" class="add-form">
+        <form method="POST" action="{{ url_for('admin.admin_add_question') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="form-group">
-                <input type="text" name="text" placeholder="Vraagtekst..." required>
+            <div class="add-form">
+                <div class="form-group">
+                    <input type="text" name="text" placeholder="Vraagtekst..." required>
+                </div>
+                <button type="submit" class="btn-primary">Toevoegen</button>
             </div>
-            <button type="submit" class="btn-primary">Toevoegen</button>
+            <div class="radio-group" style="margin-top: 0.75rem;">
+                <label class="radio-option">
+                    <input type="radio" name="question_type" value="scale" checked>
+                    <span>Schaalvraag (0-10)</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="question_type" value="open">
+                    <span>Open vraag</span>
+                </label>
+            </div>
         </form>
     </div>
     
@@ -29,10 +41,15 @@
                             <div class="question-content">
                                 <span class="question-number">{{ question.order }}.</span>
                                 <span class="question-text">{{ question.text }}</span>
+                                {% if question.question_type == 'open' %}
+                                <span class="type-badge type-open">Open</span>
+                                {% else %}
+                                <span class="type-badge type-scale">0-10</span>
+                                {% endif %}
                             </div>
                         </td>
                         <td style="vertical-align: middle; text-align: right; white-space: nowrap; padding: 0 0 0 1rem;">
-                            <button onclick="editQuestion({{ question.id }}, '{{ question.text }}')" class="btn-small btn-primary">Bewerken</button>
+                            <button onclick="editQuestion({{ question.id }}, '{{ question.text|e }}', '{{ question.question_type }}')" class="btn-small btn-primary">Bewerken</button>
                             {% if question.responses %}
                             <button type="button" class="btn-small btn-secondary" disabled title="Vragen met antwoorden kunnen niet verwijderd worden">Verwijderen</button>
                             {% else %}
@@ -64,16 +81,31 @@
                 <label>Vraagtekst</label>
                 <input type="text" id="editText" name="text" required>
             </div>
+            <div class="form-group">
+                <label>Type vraag</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="question_type" value="scale" id="editTypeScale">
+                        <span>Schaalvraag (0-10)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="question_type" value="open" id="editTypeOpen">
+                        <span>Open vraag</span>
+                    </label>
+                </div>
+            </div>
             <button type="submit" class="btn-primary">Opslaan</button>
         </form>
     </div>
 </div>
 
 <script>
-function editQuestion(id, text) {
+function editQuestion(id, text, questionType) {
     document.getElementById('editModal').style.display = 'block';
     document.getElementById('editForm').action = '/admin/questions/edit/' + id;
     document.getElementById('editText').value = text;
+    document.getElementById('editTypeScale').checked = (questionType === 'scale');
+    document.getElementById('editTypeOpen').checked = (questionType === 'open');
 }
 
 function closeModal() {

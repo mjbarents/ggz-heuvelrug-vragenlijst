@@ -42,6 +42,7 @@
                 </thead>
                 <tbody>
                     {% for stat in stats %}
+                    {% if stat.question_type == 'scale' %}
                     <tr>
                         <td>{{ stat.question }}</td>
                         <td class="score-cell">
@@ -49,11 +50,28 @@
                         </td>
                         <td>{{ stat.responses }}</td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+    
+    {% for stat in stats %}
+    {% if stat.question_type == 'open' %}
+    <div class="card" style="margin-top: 1.5rem;">
+        <h3>{{ stat.question }}</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">{{ stat.responses }} antwoord{{ 'en' if stat.responses != 1 }}</p>
+        <div class="responses-list">
+            {% for answer in stat.text_answers %}
+            <div class="answer-row">
+                <span class="answer-question" style="font-style: italic;">"{{ answer }}"</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
     {% endif %}
     
     {% if grouped_responses %}
@@ -70,9 +88,17 @@
                     {% for answer in response.answers %}
                     <div class="answer-row">
                         <span class="answer-question">{{ answer.question }}</span>
+                        {% if answer.question_type == 'open' %}
+                            {% if answer.text_answer %}
+                            <span class="answer-text">"{{ answer.text_answer }}"</span>
+                            {% else %}
+                            <span class="answer-text" style="color: var(--text-secondary); opacity: 0.6;">Geen antwoord</span>
+                            {% endif %}
+                        {% else %}
                         <span class="answer-score">
                             <span class="score-badge">{{ answer.score }}/10</span>
                         </span>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
