@@ -1,10 +1,12 @@
 from app import app, db
 from models import Question
+from db_migrations import run_schema_migrations
 
 
 def init_database():
     with app.app_context():
         db.create_all()
+        run_schema_migrations()
 
         if Question.query.count() > 0:
             print("Database already initialized.")
