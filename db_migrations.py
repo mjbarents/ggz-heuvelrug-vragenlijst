@@ -64,7 +64,32 @@ def _migration_add_question_type_column():
     _mark_applied(migration_name)
 
 
+def _migration_add_response_text_answer_column():
+    migration_name = "20260318_add_text_answer_to_response"
+    if _is_applied(migration_name):
+        return
+
+    inspector = inspect(db.engine)
+    if not inspector.has_table("response"):
+        _mark_applied(migration_name)
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("response")}
+    if "text_answer" not in columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE response "
+                "ADD COLUMN text_answer TEXT NULL"
+            )
+        )
+        db.session.commit()
+        print("Migration applied: added response.text_answer")
+
+    _mark_applied(migration_name)
+
+
 def run_schema_migrations():
     """Run lightweight, idempotent SQL migrations before app startup."""
     _ensure_schema_migrations_table()
     _migration_add_question_type_column()
+    _migration_add_response_text_answer_column()

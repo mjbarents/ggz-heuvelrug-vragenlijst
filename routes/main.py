@@ -68,6 +68,7 @@ def submit_survey():
             response = Response(
                 token_id=token.id,
                 question_id=question.id,
+                score=0,
                 text_answer=text_answer if text_answer else None,
             )
         else:
